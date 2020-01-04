@@ -1,0 +1,4 @@
+Weather_Default
+Weather_Rain
+Weather_Calm
+Weather_BigWaves

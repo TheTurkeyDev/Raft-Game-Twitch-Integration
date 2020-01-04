@@ -1,0 +1,10 @@
+stone_bird
+puffer_fish
+llama
+goat
+chicken
+boar
+rat
+shark
+bear
+mama_bear
