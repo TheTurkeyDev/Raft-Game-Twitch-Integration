@@ -19,7 +19,7 @@ using UnityEngine.AzureSky;
 [ModIconUrl("http://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_logo.jpg")] // An icon for your mod. Its recommended to be 128x128px and in .jpg format.
 [ModWallpaperUrl("https://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_banner.jpg")] // A banner for your mod. Its recommended to be 330x100px and in .jpg format.
 [ModVersionCheckUrl("")] // This is for update checking. Needs to be a .txt file with the latest mod version.
-[ModVersion("1.1")] // This is the mod version.
+[ModVersion("1.2")] // This is the mod version.
 [RaftVersion("Update Latest")] // This is the recommended raft version.
 [ModIsPermanent(true)] // If your mod add new blocks, new items or just content you should set that to true. It loads the mod on start and prevents unloading.
 public class Twitch_Itegration : Mod
@@ -220,8 +220,8 @@ public class Twitch_Itegration : Mod
                     break;
                 case "pickup_trash":
                     WaterFloatSemih2[] floatingObjects = FindObjectsOfType<WaterFloatSemih2>();
-                    int radius;
-                    int.TryParse(reward.args[0], out radius);
+                    float radius;
+                    float.TryParse(reward.args[0], out radius);
                     foreach (WaterFloatSemih2 trash in floatingObjects)
                     {
                         try
@@ -229,6 +229,8 @@ public class Twitch_Itegration : Mod
                             if (!trash.GetComponent<PickupItem>().isDropped && Vector3.Distance(trash.transform.position, player.FeetPosition) < radius)
                             {
                                 PickupItem_Networked pickup = trash.GetComponent<PickupItem_Networked>();
+                                ItemInstance itemInst = pickup.PickupItem.itemInstance;
+                                Helper.DropItem(new ItemInstance(itemInst.baseItem, itemInst.Amount, itemInst.Uses), player.transform.position, player.CameraTransform.forward, player.transform.ParentedToRaft());
                                 PickupObjectManager.RemovePickupItemNetwork(pickup);
                             }
                         }
