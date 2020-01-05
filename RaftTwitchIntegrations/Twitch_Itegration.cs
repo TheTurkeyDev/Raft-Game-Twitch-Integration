@@ -19,7 +19,7 @@ using UnityEngine.AzureSky;
 [ModIconUrl("http://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_logo.jpg")] // An icon for your mod. Its recommended to be 128x128px and in .jpg format.
 [ModWallpaperUrl("https://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_banner.jpg")] // A banner for your mod. Its recommended to be 330x100px and in .jpg format.
 [ModVersionCheckUrl("")] // This is for update checking. Needs to be a .txt file with the latest mod version.
-[ModVersion("1.0")] // This is the mod version.
+[ModVersion("1.1")] // This is the mod version.
 [RaftVersion("Update Latest")] // This is the recommended raft version.
 [ModIsPermanent(true)] // If your mod add new blocks, new items or just content you should set that to true. It loads the mod on start and prevents unloading.
 public class Twitch_Itegration : Mod
@@ -82,6 +82,7 @@ public class Twitch_Itegration : Mod
     public void Update()
     {
         Network_Player player = RAPI.getLocalPlayer();
+        Network_Host_Entities nhe = ComponentManager<Network_Host_Entities>.Value;
         RewardData reward;
         if (rewardsQueue.TryDequeue(out reward))
         {
@@ -145,7 +146,6 @@ public class Twitch_Itegration : Mod
                     player.PersonController.controller.SimpleMove(new Vector3(100, 0, 0));
                     break;
                 case "spawn_entity":
-                    Network_Host_Entities nhe = ComponentManager<Network_Host_Entities>.Value;
                     Vector3 pos = player.FeetPosition + new Vector3(0, 1, 0);
                     float scale = 1;
                     if (reward.args.Length > 1)
@@ -252,7 +252,6 @@ public class Twitch_Itegration : Mod
 
                     if (stoneDropPrefab == null)
                     {
-                        Network_Host_Entities nhe = ComponentManager<Network_Host_Entities>.Value;
                         AI_NetworkBehaviour_StoneBird ainbsb = (AI_NetworkBehaviour_StoneBird)nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.StoneBird, player.FeetPosition, 0, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
                         stoneDropPrefab = Traverse.Create(ainbsb.stateMachineStoneBird.dropStoneState).Field("stoneDropPrefab").GetValue() as StoneDrop;
                         ainbsb.Kill();
