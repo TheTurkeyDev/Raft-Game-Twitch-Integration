@@ -19,7 +19,7 @@ using UnityEngine.AzureSky;
 [ModIconUrl("http://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_logo.jpg")] // An icon for your mod. Its recommended to be 128x128px and in .jpg format.
 [ModWallpaperUrl("https://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_banner.jpg")] // A banner for your mod. Its recommended to be 330x100px and in .jpg format.
 [ModVersionCheckUrl("")] // This is for update checking. Needs to be a .txt file with the latest mod version.
-[ModVersion("1.3")] // This is the mod version.
+[ModVersion("1.4")] // This is the mod version.
 [RaftVersion("Update Latest")] // This is the recommended raft version.
 [ModIsPermanent(true)] // If your mod add new blocks, new items or just content you should set that to true. It loads the mod on start and prevents unloading.
 public class Twitch_Itegration : Mod
@@ -33,10 +33,13 @@ public class Twitch_Itegration : Mod
 
     public static ConcurrentQueue<RewardData> rewardsQueue = new ConcurrentQueue<RewardData>();
     public static List<StatData> statsEdited = new List<StatData>();
-    public static List<Vector3> meteors = new List<Vector3>();
     public static List<TempEntity> tempEntities = new List<TempEntity>();
+    public static List<Meteor> meteors = new List<Meteor>();
     public static int meteorDelay = 0;
     public static int meteorDelayTot = 10;
+
+    public static bool push = false;
+    public static PushData pushData;
 
     private StoneDrop stoneDropPrefab = null;
 
@@ -82,6 +85,7 @@ public class Twitch_Itegration : Mod
     // The Update() method is being called every frame. Have fun!
     public void Update()
     {
+        DateTime currentTime = DateTime.UtcNow;
         Network_Player player = RAPI.getLocalPlayer();
         Network_Host_Entities nhe = ComponentManager<Network_Host_Entities>.Value;
         RewardData reward;
@@ -144,10 +148,8 @@ public class Twitch_Itegration : Mod
 
                     break;
                 case "move":
-                    float pushAmount = 100;
-                    if (reward.args.Length > 0)
-                        float.TryParse(reward.args[0], out pushAmount);
-                    player.PersonController.controller.SimpleMove(new Vector3(pushAmount, 0, 0));
+                    push = true;
+                    pushData = new PushData(new Vector3(-4, 0, -4.3f), currentTime, 250);
                     break;
                 case "spawn_entity":
                     Vector3 pos = player.FeetPosition + new Vector3(0, 1, 0);
@@ -264,11 +266,14 @@ public class Twitch_Itegration : Mod
                     break;
                 case "meteor_shower":
                     int meteorsToSpawn = 1;
-                    if (reward.args.Length > 1)
+                    if (reward.args.Length > 0)
                         int.TryParse(reward.args[0], out meteorsToSpawn);
                     int spawnRadius = 1;
                     if (reward.args.Length > 1)
                         int.TryParse(reward.args[1], out spawnRadius);
+                    int meteorDamage = 1;
+                    if (reward.args.Length > 2)
+                        int.TryParse(reward.args[2], out meteorDamage);
 
                     if (stoneDropPrefab == null)
                     {
@@ -277,16 +282,16 @@ public class Twitch_Itegration : Mod
                         ainbsb.Kill();
                     }
 
-                    for (int i = 0; i < spawnRadius; i++)
+                    for (int i = 0; i < meteorsToSpawn; i++)
                     {
                         Vector3 dropPosition = player.FeetPosition + new Vector3(UnityEngine.Random.Range(-spawnRadius, spawnRadius), 200, UnityEngine.Random.Range(-spawnRadius, spawnRadius));
-                        meteors.Add(dropPosition);
+                        meteors.Add(new Meteor(dropPosition, meteorDamage));
                     }
                     break;
             }
         }
 
-        DateTime currentTime = DateTime.UtcNow;
+        
         for (int i = statsEdited.Count - 1; i >= 0; i--)
         {
             StatData data = statsEdited[i];
@@ -303,7 +308,9 @@ public class Twitch_Itegration : Mod
             TempEntity ent = tempEntities[i];
             if ((currentTime - ent.spawned).TotalMilliseconds > ent.duration)
             {
-                ent.ent.Kill();
+                //TODO: Find a better way to kill
+                Network_Entity entity = ent.ent.networkEntity;
+                ComponentManager<Network_Host>.Value.DamageEntity(entity, entity.transform, 9999f, entity.transform.position, Vector3.up, EntityType.Player, null);
                 tempEntities.RemoveAt(i);
             }
         }
@@ -314,19 +321,19 @@ public class Twitch_Itegration : Mod
             if (meteorDelay <= 0)
             {
                 meteorDelay = meteorDelayTot;
-                float dropForce = 10f;
-                Instantiate(stoneDropPrefab, meteors.ElementAt(0), Quaternion.identity).rigidBody.AddForce(Vector3.down * dropForce, ForceMode.Impulse);
+                StoneDrop stone = Instantiate(stoneDropPrefab, meteors.ElementAt(0).pos, Quaternion.identity);
+                float scale = UnityEngine.Random.Range(0.5f, 3f);
+                stone.rigidBody.transform.localScale = new Vector3(scale, scale, scale);
+                stone.rigidBody.AddForce(Vector3.down * meteors.ElementAt(0).damage, ForceMode.Impulse);
                 meteors.RemoveAt(0);
             }
         }
 
         if (Input.GetKeyDown(KeyCode.Keypad1))
         {
-            //Randomizer weather = Traverse.Create(ComponentManager<WeatherManager>.Value).Field("weatherConnections").GetValue() as Randomizer;
-            //List<string> output = new List<string>();
-            //foreach (Weather w in weather.GetAllItems<Weather>())
-            // output.Add(w.name);
-            //File.WriteAllLines(@"D:\Dumps\Weather.txt", output.ToArray());
+            Item_Base item = ItemManager.GetItemByName("Watermelon");
+            Helper.DropItem(new ItemInstance(item, 10, item.MaxUses), player.transform.position, player.CameraTransform.forward, player.transform.ParentedToRaft());
+
         }
         else if (Input.GetKeyDown(KeyCode.Keypad2))
         {
@@ -334,20 +341,57 @@ public class Twitch_Itegration : Mod
             float radius = 100;
             foreach (WaterFloatSemih2 trash in floatingObjects)
             {
+                RConsole.Log("==============");
                 try
                 {
                     if (!trash.GetComponent<PickupItem>().isDropped && Vector3.Distance(trash.transform.position, player.FeetPosition) < radius)
                     {
+
                         PickupItem_Networked pickup = trash.GetComponentInParent<PickupItem_Networked>();
                         ItemInstance itemInst = pickup.PickupItem.itemInstance;
+                        RConsole.Log("Item: " + itemInst.UniqueName);
                         Helper.DropItem(new ItemInstance(itemInst.baseItem, itemInst.Amount, itemInst.Uses), player.transform.position, player.CameraTransform.forward, player.transform.ParentedToRaft());
+                        RConsole.Log("Drop");
                         PickupObjectManager.RemovePickupItemNetwork(pickup);
+                        RConsole.Log("Pickup!");
                     }
                 }
                 catch
                 {
+                    RConsole.Log("Error");
                 }
+                RConsole.Log("==============");
             }*/
+        }
+
+        if (push)
+        {
+            player.PersonController.controller.SimpleMove(pushData.push);
+            if ((currentTime - pushData.startTime).TotalMilliseconds > pushData.duration)
+            {
+                pushData.left--;
+                if (pushData.left == 0)
+                {
+                    push = false;
+                }
+                else
+                {
+                    pushData.startTime = currentTime;
+                    float x;
+                    float z;
+                    if (UnityEngine.Random.value > 0.5)
+                        x = UnityEngine.Random.Range(-5f, -3f);
+                    else
+                        x = UnityEngine.Random.Range(3f, 5f);
+
+                    if (UnityEngine.Random.value > 0.5)
+                        z = UnityEngine.Random.Range(-5f, -3f);
+                    else
+                        z = UnityEngine.Random.Range(3f, 5f);
+
+                    pushData.push = new Vector3(x, 0, z);
+                }
+            }
         }
     }
 
@@ -566,6 +610,33 @@ public class Twitch_Itegration : Mod
         public TempEntity(AI_NetworkBehaviour ent)
         {
             this.ent = ent;
+        }
+    }
+
+    public class Meteor
+    {
+        public Vector3 pos;
+        public int damage;
+
+        public Meteor(Vector3 pos, int damage)
+        {
+            this.pos = pos;
+            this.damage = damage;
+        }
+    }
+
+    public class PushData
+    {
+        public Vector3 push;
+        public DateTime startTime;
+        public int duration;
+        public int left = 8;
+
+        public PushData(Vector3 push, DateTime startTime, int duration)
+        {
+            this.push = push;
+            this.startTime = startTime;
+            this.duration = duration;
         }
     }
 }
