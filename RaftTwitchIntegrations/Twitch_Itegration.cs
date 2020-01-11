@@ -19,7 +19,7 @@ using UnityEngine.AzureSky;
 [ModIconUrl("http://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_logo.jpg")] // An icon for your mod. Its recommended to be 128x128px and in .jpg format.
 [ModWallpaperUrl("https://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_banner.jpg")] // A banner for your mod. Its recommended to be 330x100px and in .jpg format.
 [ModVersionCheckUrl("")] // This is for update checking. Needs to be a .txt file with the latest mod version.
-[ModVersion("1.2")] // This is the mod version.
+[ModVersion("1.3")] // This is the mod version.
 [RaftVersion("Update Latest")] // This is the recommended raft version.
 [ModIsPermanent(true)] // If your mod add new blocks, new items or just content you should set that to true. It loads the mod on start and prevents unloading.
 public class Twitch_Itegration : Mod
@@ -34,6 +34,7 @@ public class Twitch_Itegration : Mod
     public static ConcurrentQueue<RewardData> rewardsQueue = new ConcurrentQueue<RewardData>();
     public static List<StatData> statsEdited = new List<StatData>();
     public static List<Vector3> meteors = new List<Vector3>();
+    public static List<TempEntity> tempEntities = new List<TempEntity>();
     public static int meteorDelay = 0;
     public static int meteorDelayTot = 10;
 
@@ -143,7 +144,10 @@ public class Twitch_Itegration : Mod
 
                     break;
                 case "move":
-                    player.PersonController.controller.SimpleMove(new Vector3(100, 0, 0));
+                    float pushAmount = 100;
+                    if (reward.args.Length > 0)
+                        float.TryParse(reward.args[0], out pushAmount);
+                    player.PersonController.controller.SimpleMove(new Vector3(pushAmount, 0, 0));
                     break;
                 case "spawn_entity":
                     Vector3 pos = player.FeetPosition + new Vector3(0, 1, 0);
@@ -151,45 +155,59 @@ public class Twitch_Itegration : Mod
                     if (reward.args.Length > 1)
                         float.TryParse(reward.args[1], out scale);
                     int amountFromEntries = 1;
-                    if (reward.args.Length > 1)
+                    if (reward.args.Length > 2)
                         int.TryParse(reward.args[2], out amountFromEntries);
+                    int spawnDuration = 1;
+                    if (reward.args.Length > 3)
+                        int.TryParse(reward.args[3], out spawnDuration);
+                    TempEntity tempEnt;
                     for (int index = 0; index < amountFromEntries; ++index)
                     {
                         switch (reward.args[0])
                         {
                             case "stone_bird":
-                                nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.StoneBird, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.StoneBird, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "puffer_fish":
-                                nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.PufferFish, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.PufferFish, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "llama":
-                                nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Llama, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Llama, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "goat":
-                                nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Goat, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Goat, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "chicken":
-                                nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Chicken, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Chicken, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "boar":
-                                nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Boar, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Boar, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "rat":
-                                nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Rat, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Rat, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "shark":
-                                nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Shark, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Shark, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "bear":
-                                nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Bear, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Bear, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "mama_bear":
-                                nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.MamaBear, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.MamaBear, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "seagull":
                                 //TODO: It's not like the others for some reason.....
+                                tempEnt = null;
                                 break;
+                            default:
+                                tempEnt = null;
+                                break;
+                        }
+                        if (tempEnt != null && spawnDuration != -1)
+                        {
+                            tempEnt.spawned = DateTime.UtcNow;
+                            tempEnt.duration = spawnDuration * 1000;
+                            tempEntities.Add(tempEnt);
                         }
                     }
                     break;
@@ -280,6 +298,16 @@ public class Twitch_Itegration : Mod
             }
         }
 
+        for (int i = tempEntities.Count - 1; i >= 0; i--)
+        {
+            TempEntity ent = tempEntities[i];
+            if ((currentTime - ent.spawned).TotalMilliseconds > ent.duration)
+            {
+                ent.ent.Kill();
+                tempEntities.RemoveAt(i);
+            }
+        }
+
         if (meteors.Count > 0)
         {
             meteorDelay--;
@@ -302,19 +330,23 @@ public class Twitch_Itegration : Mod
         }
         else if (Input.GetKeyDown(KeyCode.Keypad2))
         {
-            /*if (stoneDropPrefab == null)
+            /*WaterFloatSemih2[] floatingObjects = FindObjectsOfType<WaterFloatSemih2>();
+            float radius = 100;
+            foreach (WaterFloatSemih2 trash in floatingObjects)
             {
-                Network_Host_Entities nhe = ComponentManager<Network_Host_Entities>.Value;
-                AI_NetworkBehaviour_StoneBird ainbsb = (AI_NetworkBehaviour_StoneBird)nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.StoneBird, player.FeetPosition, 0, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
-                stoneDropPrefab = Traverse.Create(ainbsb.stateMachineStoneBird.dropStoneState).Field("stoneDropPrefab").GetValue() as StoneDrop;
-                ainbsb.Kill();
-            }
-
-
-            for (int i = 0; i < 25; i++)
-            {
-                Vector3 dropPosition = player.FeetPosition + new Vector3(UnityEngine.Random.Range(-30, 30), 200, UnityEngine.Random.Range(-30, 30));
-                meteors.Add(dropPosition);
+                try
+                {
+                    if (!trash.GetComponent<PickupItem>().isDropped && Vector3.Distance(trash.transform.position, player.FeetPosition) < radius)
+                    {
+                        PickupItem_Networked pickup = trash.GetComponentInParent<PickupItem_Networked>();
+                        ItemInstance itemInst = pickup.PickupItem.itemInstance;
+                        Helper.DropItem(new ItemInstance(itemInst.baseItem, itemInst.Amount, itemInst.Uses), player.transform.position, player.CameraTransform.forward, player.transform.ParentedToRaft());
+                        PickupObjectManager.RemovePickupItemNetwork(pickup);
+                    }
+                }
+                catch
+                {
+                }
             }*/
         }
     }
@@ -496,11 +528,6 @@ public class Twitch_Itegration : Mod
         }
     }
 
-    public static void startSocket()
-    {
-
-    }
-
     public class RewardData
     {
         public string action;
@@ -527,6 +554,18 @@ public class Twitch_Itegration : Mod
         public StatData(string stat)
         {
             this.stat = stat;
+        }
+    }
+
+    public class TempEntity
+    {
+        public AI_NetworkBehaviour ent;
+        public DateTime spawned;
+        public int duration;
+
+        public TempEntity(AI_NetworkBehaviour ent)
+        {
+            this.ent = ent;
         }
     }
 }

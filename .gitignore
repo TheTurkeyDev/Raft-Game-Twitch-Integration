@@ -1,2 +1,5 @@
 .vs/
 RaftTwitchIntegrations/obj/
+packages/
+RaftTwitchIntegrations/app.config
+RaftTwitchIntegrations/packages.config
