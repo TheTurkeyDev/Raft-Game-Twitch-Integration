@@ -19,7 +19,7 @@ using UnityEngine.AzureSky;
 [ModIconUrl("http://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_logo.jpg")] // An icon for your mod. Its recommended to be 128x128px and in .jpg format.
 [ModWallpaperUrl("https://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_banner.jpg")] // A banner for your mod. Its recommended to be 330x100px and in .jpg format.
 [ModVersionCheckUrl("")] // This is for update checking. Needs to be a .txt file with the latest mod version.
-[ModVersion("1.4")] // This is the mod version.
+[ModVersion("1.5")] // This is the mod version.
 [RaftVersion("Update Latest")] // This is the recommended raft version.
 [ModIsPermanent(true)] // If your mod add new blocks, new items or just content you should set that to true. It loads the mod on start and prevents unloading.
 public class Twitch_Itegration : Mod
@@ -36,7 +36,7 @@ public class Twitch_Itegration : Mod
     public static List<TempEntity> tempEntities = new List<TempEntity>();
     public static List<Meteor> meteors = new List<Meteor>();
     public static int meteorDelay = 0;
-    public static int meteorDelayTot = 10;
+    public static int meteorDelayTot = 8;
 
     public static bool push = false;
     public static PushData pushData;
@@ -88,6 +88,8 @@ public class Twitch_Itegration : Mod
         DateTime currentTime = DateTime.UtcNow;
         Network_Player player = RAPI.getLocalPlayer();
         Network_Host_Entities nhe = ComponentManager<Network_Host_Entities>.Value;
+        Raft raft = ComponentManager<Raft>.Value;
+        Rigidbody body = Traverse.Create(raft).Field("body").GetValue() as Rigidbody;
         RewardData reward;
         if (rewardsQueue.TryDequeue(out reward))
         {
@@ -152,7 +154,7 @@ public class Twitch_Itegration : Mod
                     pushData = new PushData(new Vector3(-4, 0, -4.3f), currentTime, 250);
                     break;
                 case "spawn_entity":
-                    Vector3 pos = player.FeetPosition + new Vector3(0, 1, 0);
+                    Vector3 pos = player.FeetPosition;
                     float scale = 1;
                     if (reward.args.Length > 1)
                         float.TryParse(reward.args[1], out scale);
@@ -163,39 +165,43 @@ public class Twitch_Itegration : Mod
                     if (reward.args.Length > 3)
                         int.TryParse(reward.args[3], out spawnDuration);
                     TempEntity tempEnt;
+                    uint objIndex = SaveAndLoad.GetUniqueObjectIndex();
                     for (int index = 0; index < amountFromEntries; ++index)
                     {
                         switch (reward.args[0])
                         {
                             case "stone_bird":
-                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.StoneBird, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.StoneBird, pos, scale, objIndex, SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "puffer_fish":
-                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.PufferFish, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.PufferFish, pos, scale, objIndex, SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "llama":
-                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Llama, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Llama, pos, scale, objIndex, SaveAndLoad.GetUniqueObjectIndex(), null));
+                                (tempEnt.ent as AI_NetworkBehaviour_Domestic).QuickTameLate();
                                 break;
                             case "goat":
-                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Goat, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Goat, pos, scale, objIndex, SaveAndLoad.GetUniqueObjectIndex(), null));
+                                (tempEnt.ent as AI_NetworkBehaviour_Domestic).QuickTameLate();
                                 break;
                             case "chicken":
-                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Chicken, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Chicken, pos, scale, objIndex, SaveAndLoad.GetUniqueObjectIndex(), null));
+                                (tempEnt.ent as AI_NetworkBehaviour_Domestic).QuickTameLate();
                                 break;
                             case "boar":
-                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Boar, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Boar, pos, scale, objIndex, SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "rat":
-                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Rat, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Rat, pos, scale, objIndex, SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "shark":
-                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Shark, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Shark, pos, scale, objIndex, SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "bear":
-                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Bear, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.Bear, pos, scale, objIndex, SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "mama_bear":
-                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.MamaBear, pos, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null));
+                                tempEnt = new TempEntity(nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.MamaBear, pos, scale, objIndex, SaveAndLoad.GetUniqueObjectIndex(), null));
                                 break;
                             case "seagull":
                                 //TODO: It's not like the others for some reason.....
@@ -207,6 +213,11 @@ public class Twitch_Itegration : Mod
                         }
                         if (tempEnt != null && spawnDuration != -1)
                         {
+                            Semih_Network network = ComponentManager<Semih_Network>.Value;
+                            Message_CreateAINetworkBehaviour networkBehaviour2 = new Message_CreateAINetworkBehaviour(Messages.CreateAINetworkBehaviour, network.NetworkIDManager, objIndex, pos, tempEnt.ent, null);
+                            if (network == null)
+                                network = ComponentManager<Semih_Network>.Value;
+                            network.RPC(networkBehaviour2, Target.Other, EP2PSend.k_EP2PSendReliable, NetworkChannel.Channel_Game);
                             tempEnt.spawned = DateTime.UtcNow;
                             tempEnt.duration = spawnDuration * 1000;
                             tempEntities.Add(tempEnt);
@@ -240,7 +251,7 @@ public class Twitch_Itegration : Mod
                     break;
                 case "pickup_trash":
                     WaterFloatSemih2[] floatingObjects = FindObjectsOfType<WaterFloatSemih2>();
-                    float radius;
+                    float radius = 100;
                     float.TryParse(reward.args[0], out radius);
                     foreach (WaterFloatSemih2 trash in floatingObjects)
                     {
@@ -248,15 +259,13 @@ public class Twitch_Itegration : Mod
                         {
                             if (!trash.GetComponent<PickupItem>().isDropped && Vector3.Distance(trash.transform.position, player.FeetPosition) < radius)
                             {
-                                PickupItem_Networked pickup = trash.GetComponent<PickupItem_Networked>();
-                                ItemInstance itemInst = pickup.PickupItem.itemInstance;
-                                Helper.DropItem(new ItemInstance(itemInst.baseItem, itemInst.Amount, itemInst.Uses), player.transform.position, player.CameraTransform.forward, player.transform.ParentedToRaft());
-                                PickupObjectManager.RemovePickupItemNetwork(pickup);
+
+                                PickupItem_Networked pickup = trash.GetComponentInParent<PickupItem_Networked>();
+                                PickupObjectManager.RemovePickupItemNetwork(pickup, SteamUser.GetSteamID());
                             }
                         }
                         catch
                         {
-
                         }
                     }
                     break;
@@ -288,10 +297,19 @@ public class Twitch_Itegration : Mod
                         meteors.Add(new Meteor(dropPosition, meteorDamage));
                     }
                     break;
+                case "push_raft":
+                    float pushForce = 2000;
+                    float.TryParse(reward.args[0], out pushForce);
+                    body.AddForce(getBoundedRandVector(0.5f, 1) * pushForce, ForceMode.Impulse);
+                    break;
+                case "rotate_raft":
+                    float rotationForce = 50;
+                    body.AddTorque(new Vector3(0, rotationForce, 0), ForceMode.Impulse);
+                    break;
             }
         }
 
-        
+
         for (int i = statsEdited.Count - 1; i >= 0; i--)
         {
             StatData data = statsEdited[i];
@@ -308,9 +326,16 @@ public class Twitch_Itegration : Mod
             TempEntity ent = tempEntities[i];
             if ((currentTime - ent.spawned).TotalMilliseconds > ent.duration)
             {
-                //TODO: Find a better way to kill
-                Network_Entity entity = ent.ent.networkEntity;
-                ComponentManager<Network_Host>.Value.DamageEntity(entity, entity.transform, 9999f, entity.transform.position, Vector3.up, EntityType.Player, null);
+                if (ent.ent != null)
+                {
+                    Network_Entity entity = ent.ent.networkEntity;
+                    entity.Button_Kill();
+                    AI_StateMachine stateMachine = ent.ent.GetComponent<AI_StateMachine>();
+                    if (stateMachine is AI_StateMachine_Animal)
+                    {
+                        Traverse.Create((stateMachine as AI_StateMachine_Animal).deadState).Method("RemoveBody").GetValue();
+                    }
+                }
                 tempEntities.RemoveAt(i);
             }
         }
@@ -322,7 +347,7 @@ public class Twitch_Itegration : Mod
             {
                 meteorDelay = meteorDelayTot;
                 StoneDrop stone = Instantiate(stoneDropPrefab, meteors.ElementAt(0).pos, Quaternion.identity);
-                float scale = UnityEngine.Random.Range(0.5f, 3f);
+                float scale = UnityEngine.Random.Range(0.5f, 4f);
                 stone.rigidBody.transform.localScale = new Vector3(scale, scale, scale);
                 stone.rigidBody.AddForce(Vector3.down * meteors.ElementAt(0).damage, ForceMode.Impulse);
                 meteors.RemoveAt(0);
@@ -337,31 +362,7 @@ public class Twitch_Itegration : Mod
         }
         else if (Input.GetKeyDown(KeyCode.Keypad2))
         {
-            /*WaterFloatSemih2[] floatingObjects = FindObjectsOfType<WaterFloatSemih2>();
-            float radius = 100;
-            foreach (WaterFloatSemih2 trash in floatingObjects)
-            {
-                RConsole.Log("==============");
-                try
-                {
-                    if (!trash.GetComponent<PickupItem>().isDropped && Vector3.Distance(trash.transform.position, player.FeetPosition) < radius)
-                    {
 
-                        PickupItem_Networked pickup = trash.GetComponentInParent<PickupItem_Networked>();
-                        ItemInstance itemInst = pickup.PickupItem.itemInstance;
-                        RConsole.Log("Item: " + itemInst.UniqueName);
-                        Helper.DropItem(new ItemInstance(itemInst.baseItem, itemInst.Amount, itemInst.Uses), player.transform.position, player.CameraTransform.forward, player.transform.ParentedToRaft());
-                        RConsole.Log("Drop");
-                        PickupObjectManager.RemovePickupItemNetwork(pickup);
-                        RConsole.Log("Pickup!");
-                    }
-                }
-                catch
-                {
-                    RConsole.Log("Error");
-                }
-                RConsole.Log("==============");
-            }*/
         }
 
         if (push)
@@ -377,22 +378,27 @@ public class Twitch_Itegration : Mod
                 else
                 {
                     pushData.startTime = currentTime;
-                    float x;
-                    float z;
-                    if (UnityEngine.Random.value > 0.5)
-                        x = UnityEngine.Random.Range(-5f, -3f);
-                    else
-                        x = UnityEngine.Random.Range(3f, 5f);
-
-                    if (UnityEngine.Random.value > 0.5)
-                        z = UnityEngine.Random.Range(-5f, -3f);
-                    else
-                        z = UnityEngine.Random.Range(3f, 5f);
-
-                    pushData.push = new Vector3(x, 0, z);
+                    pushData.push = getBoundedRandVector(3, 5);
                 }
             }
         }
+    }
+
+    public Vector3 getBoundedRandVector(float min, float max)
+    {
+        float x;
+        float z;
+        if (UnityEngine.Random.value > 0.5)
+            x = UnityEngine.Random.Range(-max, -min);
+        else
+            x = UnityEngine.Random.Range(min, max);
+
+        if (UnityEngine.Random.value > 0.5)
+            z = UnityEngine.Random.Range(-max, -min);
+        else
+            z = UnityEngine.Random.Range(min, max);
+
+        return new Vector3(x, 0, z);
     }
 
     public void setStatVal(Network_Player player, string stat, float amount)
@@ -412,9 +418,11 @@ public class Twitch_Itegration : Mod
                 player.PersonController.jumpSpeed = amount;
                 break;
             case "thirst":
+                Traverse.Create(player.Stats.stat_hunger.Normal).Field("drinking").SetValue(false);
                 player.Stats.stat_thirst.Value = amount;
                 break;
             case "hunger":
+                Traverse.Create(player.Stats.stat_hunger.Normal).Field("digesting").SetValue(false);
                 player.Stats.stat_hunger.Normal.Value = amount;
                 break;
             case "oxygen":
