@@ -19,7 +19,7 @@ using UnityEngine.AzureSky;
 [ModIconUrl("http://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_logo.jpg")] // An icon for your mod. Its recommended to be 128x128px and in .jpg format.
 [ModWallpaperUrl("https://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_banner.jpg")] // A banner for your mod. Its recommended to be 330x100px and in .jpg format.
 [ModVersionCheckUrl("")] // This is for update checking. Needs to be a .txt file with the latest mod version.
-[ModVersion("1.5")] // This is the mod version.
+[ModVersion("1.6")] // This is the mod version.
 [RaftVersion("Update Latest")] // This is the recommended raft version.
 [ModIsPermanent(true)] // If your mod add new blocks, new items or just content you should set that to true. It loads the mod on start and prevents unloading.
 public class Twitch_Itegration : Mod
