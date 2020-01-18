@@ -298,12 +298,13 @@ public class Twitch_Itegration : Mod
                     }
                     break;
                 case "push_raft":
-                    float pushForce = 2000;
+                    float pushForce;
                     float.TryParse(reward.args[0], out pushForce);
                     body.AddForce(getBoundedRandVector(0.5f, 1) * pushForce, ForceMode.Impulse);
                     break;
                 case "rotate_raft":
-                    float rotationForce = 50;
+                    float rotationForce;
+                    float.TryParse(reward.args[0], out rotationForce);
                     body.AddTorque(new Vector3(0, rotationForce, 0), ForceMode.Impulse);
                     break;
             }
@@ -356,9 +357,8 @@ public class Twitch_Itegration : Mod
 
         if (Input.GetKeyDown(KeyCode.Keypad1))
         {
-            Item_Base item = ItemManager.GetItemByName("Watermelon");
-            Helper.DropItem(new ItemInstance(item, 10, item.MaxUses), player.transform.position, player.CameraTransform.forward, player.transform.ParentedToRaft());
-
+            //Item_Base item = ItemManager.GetItemByName("Watermelon");
+            //Helper.DropItem(new ItemInstance(item, 10, item.MaxUses), player.transform.position, player.CameraTransform.forward, player.transform.ParentedToRaft());
         }
         else if (Input.GetKeyDown(KeyCode.Keypad2))
         {
