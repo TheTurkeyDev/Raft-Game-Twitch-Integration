@@ -418,7 +418,7 @@ public class Twitch_Itegration : Mod
                 player.PersonController.jumpSpeed = amount;
                 break;
             case "thirst":
-                Traverse.Create(player.Stats.stat_hunger.Normal).Field("drinking").SetValue(false);
+                Traverse.Create(player.Stats.stat_thirst).Field("drinking").SetValue(false);
                 player.Stats.stat_thirst.Value = amount;
                 break;
             case "hunger":
