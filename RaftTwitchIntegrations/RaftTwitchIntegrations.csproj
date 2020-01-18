@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <!--Change this line to point to your own Raft installation and make sure you have run Raft Modloader at least once-->
-    <RaftInstallation>C:\Program Files(x86)\Steam\steamapps\common\Raft</RaftInstallation>
+    <RaftInstallation>D:\Apps\SteamLibrary\steamapps\common\Raft</RaftInstallation>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
