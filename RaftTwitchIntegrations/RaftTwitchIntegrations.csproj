@@ -58,7 +58,7 @@
     <Reference Include="NavMeshComponents">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\NavMeshComponents.dll</HintPath>
     </Reference>
-    <PackageReference Include="Newtonsoft.Json" Version="8.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <Reference Include="Sirenix.OdinInspector.Attributes">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\Sirenix.OdinInspector.Attributes.dll</HintPath>
     </Reference>
