@@ -4,6 +4,7 @@
   <PropertyGroup>
     <!--Change this line to point to your own Raft installation and make sure you have run Raft Modloader at least once-->
     <RaftInstallation>D:\Apps\SteamLibrary\steamapps\common\Raft</RaftInstallation>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -13,7 +14,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RaftTwitchIntegrations</RootNamespace>
     <AssemblyName>RaftTwitchIntegrations</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -36,9 +37,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Twitch_Itegration.cs" />
+    <Compile Include="IntegrationSocket.cs" />
+    <Compile Include="TwitchItegration.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="0Harmony, Version=2.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -48,7 +54,9 @@
     <Reference Include="coremod">
       <HintPath>$(AppData)\RaftModLoader\binaries\coremod.dll</HintPath>
     </Reference>
-    <PackageReference Include="EngineIoClientDotNet" Version="0.9.22" />
+    <Reference Include="HMLCoreLibrary">
+      <HintPath>C:\Users\Ryan\AppData\Roaming\RaftModLoader\binaries\HMLCoreLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Posix">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\Mono.Posix.dll</HintPath>
     </Reference>
@@ -58,12 +66,9 @@
     <Reference Include="NavMeshComponents">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\NavMeshComponents.dll</HintPath>
     </Reference>
-    <PackageReference Include="Newtonsoft.Json" Version="8.0.1" />
     <Reference Include="Sirenix.OdinInspector.Attributes">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\Sirenix.OdinInspector.Attributes.dll</HintPath>
     </Reference>
-    <PackageReference Include="SocketIoClientDotNet" Version="0.9.13" />
-    <PackageReference Include="SuperSocket.ClientEngine" Version="0.10.0" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Security" />
@@ -102,9 +107,6 @@
     <Reference Include="UnityEngine.AudioModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.BaselibModule">
-      <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.BaselibModule.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.ClothModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.ClothModule.dll</HintPath>
     </Reference>
@@ -122,9 +124,6 @@
     </Reference>
     <Reference Include="UnityEngine.DirectorModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.FileSystemHttpModule">
-      <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.FileSystemHttpModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.GameCenterModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.GameCenterModule.dll</HintPath>
@@ -149,9 +148,6 @@
     </Reference>
     <Reference Include="UnityEngine.LocalizationModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.LocalizationModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.Networking.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
@@ -186,9 +182,6 @@
     <Reference Include="UnityEngine.StreamingModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.StreamingModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.StyleSheetsModule">
-      <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.StyleSheetsModule.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine.SubstanceModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.SubstanceModule.dll</HintPath>
     </Reference>
@@ -206,12 +199,6 @@
     </Reference>
     <Reference Include="UnityEngine.TilemapModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.TilemapModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Timeline">
-      <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.Timeline.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TimelineModule">
-      <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.TimelineModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TLSModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.TLSModule.dll</HintPath>
@@ -273,10 +260,13 @@
     <Reference Include="UnityEngine.XRModule">
       <HintPath>$(RaftInstallation)\Raft_Data\Managed\UnityEngine.XRModule.dll</HintPath>
     </Reference>
-    <PackageReference Include="WebSocket4Net" Version="0.15.2" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="definitions.json" />
+    <None Include="modinfo.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

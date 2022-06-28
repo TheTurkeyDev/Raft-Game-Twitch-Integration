@@ -1,0 +1,399 @@
+{
+  "_id": "ObjectId(\"62b40fb61b56981a68c4c6ec\")",
+  "created_at": {
+    "$date": 1655954670230
+  },
+  "definitions": {
+    "PlaySound": {
+      "params": {
+        "sound": {
+          "type": "string",
+          "display": "Sound File Name",
+          "description": "Name of the sound file, including extension",
+          "required": true
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Play A Sound",
+      "description": "Plays the given sound file"
+    },
+    "ChatMessage": {
+      "params": {
+        "message": {
+          "type": "string",
+          "display": "Message",
+          "description": "Message to send",
+          "required": true
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Chat Message",
+      "description": "Send a message in the chat"
+    },
+    "SpawnItem": {
+      "params": {
+        "item": {
+          "type": "string",
+          "display": "Item Id",
+          "description": "Id of the item to spawn in",
+          "required": true
+        },
+        "amount": {
+          "type": "number",
+          "display": "Amount",
+          "description": "Amount of the item to spawn in",
+          "required": true
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Spawn Item",
+      "description": "Spawn an item into the world"
+    },
+    "InventoryBomb": {
+      "params": {
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Inventory Bomb",
+      "description": "You know what this is... ;)"
+    },
+    "StatEdit": {
+      "params": {
+        "action": {
+          "type": "string",
+          "display": "Action",
+          "description": "One of: 'set', 'add', or 'subtract'. This is how the value is changed",
+          "required": true
+        },
+        "stat": {
+          "type": "string",
+          "display": "Stat",
+          "description": "One of: 'gravity', 'swim_speed', 'walk_speed', 'jump_speed', 'thirst', 'hunger', 'oxygen', or 'health'. This is the stat to be changed.",
+          "required": true
+        },
+        "changeAmount": {
+          "type": "decimal",
+          "display": "Change Amount",
+          "description": "The amount to change the current value",
+          "required": true
+        },
+        "duration": {
+          "type": "number",
+          "display": "Duration",
+          "description": "How long this change should last in seconds. -1 for permanent",
+          "required": true
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Stat Edit",
+      "description": "Edit a stat attribute of the player"
+    },
+    "PushPlayer": {
+      "params": {
+        "force": {
+          "type": "number",
+          "display": "Force",
+          "description": "Amount of force to apply (multiplied on a random from 0.5 to 1)",
+          "default": 8,
+          "min": 0
+        },
+        "duration": {
+          "type": "number",
+          "display": "Duration",
+          "description": "How long this push should last for",
+          "default": 300,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Push Player",
+      "description": "Pushes the player a hardcoded amount. Will make not hard coded in the future"
+    },
+    "SpawnEntity": {
+      "params": {
+        "entity": {
+          "type": "string",
+          "display": "entity",
+          "description": "The Id of the entity to spawn",
+          "required": true
+        },
+        "scale": {
+          "type": "decimal",
+          "display": "Scale",
+          "description": "The scale (size) of the mob ",
+          "required": true,
+          "default": 1
+        },
+        "amount": {
+          "type": "number",
+          "display": "Amount",
+          "description": "The amount of entities to spawn",
+          "required": true,
+          "default": 1
+        },
+        "spawnDuration": {
+          "type": "number",
+          "display": "Spawn Duration",
+          "description": "How long (in seconds) the mob should stay in the world for. Use -1 for a permanent spawn",
+          "required": true,
+          "default": -1
+        },
+        "health": {
+          "type": "number",
+          "display": "Health",
+          "description": "How much health to spawn the mob with. Ignore to leave at default",
+          "required": false
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Spawn Entity",
+      "description": "Spawns the defined entity in the world"
+    },
+    "ChangeWeather": {
+      "params": {
+        "weather": {
+          "type": "string",
+          "display": "Weather",
+          "description": "The weather to change to",
+          "required": true
+        },
+        "instant": {
+          "type": "boolean",
+          "display": "Should be instant?",
+          "description": "Weather (haha I'm so funny) or not the weather change should be instant",
+          "required": true,
+          "default": false
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Change Weather",
+      "description": "Change the current weather in the world"
+    },
+    "SetTime": {
+      "params": {
+        "hours": {
+          "type": "number",
+          "display": "Hours",
+          "description": "The hours of day to set to",
+          "required": true
+        },
+        "minutes": {
+          "type": "number",
+          "display": "Minutes",
+          "description": "The minute of the hour to set to",
+          "required": true
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Set Time",
+      "description": "Set the time of the world"
+    },
+    "PickupTrash": {
+      "params": {
+        "radius": {
+          "type": "decimal",
+          "display": "Radius",
+          "description": "The radius within trash should be picked up",
+          "required": true
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Pickup Trash",
+      "description": "Picks up all the trash within the specified radius"
+    },
+    "RunCommand": {
+      "params": {
+        "command": {
+          "type": "string",
+          "display": "Command",
+          "description": "The command to run",
+          "required": true
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Run A Command",
+      "description": "Runs a command in the chat"
+    },
+    "MeteorShower": {
+      "params": {
+        "meteors": {
+          "type": "number",
+          "display": "# Meteors",
+          "description": "The number of Meteors to spawn",
+          "default": 1,
+          "required": true
+        },
+        "spawnRadius": {
+          "type": "number",
+          "display": "Spawn Radius",
+          "description": "Radius that the meteors should spawn within",
+          "default": 5,
+          "required": true
+        },
+        "meteorDamage": {
+          "type": "number",
+          "display": "Meteor Damage",
+          "description": "How much damage the meteors should deal",
+          "default": 5,
+          "required": true
+        },
+        "meteorInterval": {
+          "type": "number",
+          "display": "Meteor Spawn Interval",
+          "description": "Interval between meteor spawns",
+          "default": 300,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms",
+          "required": true
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Meteor Shower",
+      "description": "Spawns a bunch of meteors (Rocks), that fall out of the sky"
+    },
+    "PushRaft": {
+      "params": {
+        "force": {
+          "type": "decimal",
+          "display": "Force",
+          "description": "The amount of force to push the raft with",
+          "required": true
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Push The Raft",
+      "description": "Pushes the raft with the specified amount of force"
+    },
+    "RotateRaft": {
+      "params": {
+        "force": {
+          "type": "decimal",
+          "display": "Force",
+          "description": "The amount of force to rotate the raft with",
+          "required": true
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Rotate The Raft",
+      "description": "Rotates the raft with the specified amount of force"
+    }
+  },
+  "type": "config",
+  "updated_at": {
+    "$date": 1655954670230
+  }
+}
