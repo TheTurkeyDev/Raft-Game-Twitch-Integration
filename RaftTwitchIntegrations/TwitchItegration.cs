@@ -12,9 +12,15 @@ using UnityEngine.AzureSky;
 using HarmonyLib;
 using Debug = UnityEngine.Debug;
 using Newtonsoft.Json.Linq;
+using TMPro;
 
 public class TwitchItegration : Mod
 {
+    private static readonly System.Random RAND = new System.Random();
+
+    public static int CHANNEL_ID = 2349;
+    public static Messages MESSAGE_TYPE_SET_NAME = (Messages)2349;
+
     private ChatManager chat;
     private readonly Dictionary<string, Sound> sounds = new Dictionary<string, Sound>();
     private ChannelGroup channels;
@@ -27,12 +33,23 @@ public class TwitchItegration : Mod
     public static List<PushData> pushData = new List<PushData>();
 
     private StoneDrop stoneDropPrefab = null;
+    private Harmony harmonyInstance;
+    private static AssetBundle assets;
 
 
     // The Start() method is being called when your mod gets loaded.
-    public void Start()
+    public IEnumerator Start()
     {
         Debug.Log("Twitch Integration has been loaded!");
+
+        AssetBundleCreateRequest request = AssetBundle.LoadFromMemoryAsync(GetEmbeddedFileBytes("twitchintegrations.assets"));
+        yield return request;
+        assets = request.assetBundle;
+
+        harmonyInstance = new Harmony("dev.theturkey.twitchintegration");
+        harmonyInstance.PatchAll();
+
+
         channels = new ChannelGroup();
 
         system.getMasterChannelGroup(out channels);
@@ -250,7 +267,7 @@ public class TwitchItegration : Mod
                         }
                         break;
                     case "RunCommand":
-                        Traverse.Create(RConsole.instance).Method("SilentlyRunCommand", new Type[] { typeof(string) }, new object[] { values["command"] }).GetValue<string>();
+                        Traverse.Create(HMLLibrary.HConsole.instance).Method("SilentlyRunCommand", new Type[] { typeof(string) }, new object[] { (string)values["command"] }).GetValue<string>();
                         break;
                     case "MeteorShower":
                         int meteorsToSpawn = (int)values["meteors"];
@@ -274,6 +291,27 @@ public class TwitchItegration : Mod
                     case "RotateRaft":
                         float rotationForce = (float)values["force"];
                         body.AddTorque(new Vector3(0, rotationForce, 0), ForceMode.Impulse);
+                        break;
+                    case "NameShark":
+                        AI_NetworkBehaviour[] array = NetworkIDManager.GetNetworkdIDs<AI_NetworkBehaviour>().Where(a => a is AI_NetworkBehavior_Shark).ToArray();
+                        if (array == null || array.Length == 0)
+                            break;
+
+                        bool added = false;
+                        foreach (AI_NetworkBehavior_Shark shark in array)
+                        {
+                            var nametag = shark.stateMachineShark.GetComponentInChildren<TextMeshPro>();
+                            if (nametag == null)
+                            {
+                                AddNametag(shark.stateMachineShark, userName);
+                                added = true;
+                                break;
+                            }
+                        }
+
+                        if (!added)
+                            AddNametag(((AI_NetworkBehavior_Shark)array[RAND.Next(array.Length)]).stateMachineShark, userName);
+
                         break;
                 }
             }
@@ -475,6 +513,57 @@ public class TwitchItegration : Mod
     public static void Shutdown()
     {
         source.Cancel();
+    }
+
+    public void FixedUpdate()
+    {
+        var message = RAPI.ListenForNetworkMessagesOnChannel(CHANNEL_ID);
+        if (message != null)
+        {
+            if (message.message.Type == MESSAGE_TYPE_SET_NAME && !Raft_Network.IsHost)
+            {
+                if (message.message is UpdateSharkNameMessage msg)
+                {
+                    var maybeShark = NetworkIDManager.GetNetworkIDFromObjectIndex<AI_NetworkBehaviour>(msg.sharkId);
+                    if (maybeShark is AI_NetworkBehavior_Shark shark)
+                    {
+                        var nameTag = shark.stateMachineShark.GetComponentInChildren<TextMeshPro>();
+                        nameTag.text = msg.name;
+                    }
+                }
+            }
+        }
+    }
+
+    public static TextMeshPro AddNametag(AI_StateMachine_Shark shark, string name)
+    {
+        var nameTag = Instantiate(assets.LoadAsset<GameObject>("Name Tag"));
+        nameTag.AddComponent<Billboard>();
+
+        nameTag.transform.SetParent(shark.transform);
+        nameTag.transform.localPosition = new Vector3(0, 2f, 0);
+        nameTag.transform.localRotation = Quaternion.identity;
+
+        var text = nameTag.GetComponentInChildren<TextMeshPro>();
+
+        if (Raft_Network.IsHost)
+            text.text = name;
+
+        return text;
+    }
+
+    [ConsoleCommand(name: "killall", docs: "Kill all mobs")]
+    public static void KillAllCommand(string[] args)
+    {
+        Network_Entity[] array = FindObjectsOfType<Network_Entity>();
+        if (array.Length != 0)
+        {
+            Network_Entity[] array2 = array;
+            foreach (Network_Entity network_Entity in array2)
+            {
+                ComponentManager<Network_Host>.Value.DamageEntity(network_Entity, network_Entity.transform, 9999f, network_Entity.transform.position, Vector3.up, EntityType.Player);
+            }
+        }
     }
 
 

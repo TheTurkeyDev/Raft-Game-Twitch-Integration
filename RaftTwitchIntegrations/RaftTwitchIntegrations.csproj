@@ -37,8 +37,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Billboard.cs" />
     <Compile Include="IntegrationSocket.cs" />
+    <Compile Include="patches\AI_NetworkBehavior_Shark_Serialize_Update_Animal_Patch.cs" />
     <Compile Include="TwitchItegration.cs" />
+    <Compile Include="UpdateSharkNameMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.2.1.0, Culture=neutral, processorArchitecture=MSIL">

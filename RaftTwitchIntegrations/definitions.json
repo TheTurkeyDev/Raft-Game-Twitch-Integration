@@ -390,6 +390,21 @@
       },
       "display": "Rotate The Raft",
       "description": "Rotates the raft with the specified amount of force"
+    },
+    "NameShark": {
+      "params": {
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Name A Shark",
+      "description": "Names a shark with the trigger user's name"
     }
   },
   "type": "config",
