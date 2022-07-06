@@ -405,6 +405,51 @@
       },
       "display": "Name A Shark",
       "description": "Names a shark with the trigger user's name"
+    },
+    "InventoryShuffle": {
+      "params": {
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Inventory Shuffle",
+      "description": "Shuffles the player's inventory"
+    },
+    "ExplodingPufferfish": {
+      "params": {
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Exploding Pufferfish",
+      "description": "Pufferfish Go Boom"
+    },
+    "PaintRaft": {
+      "params": {
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Paint Raft",
+      "description": "All the colors!"
     }
   },
   "type": "config",

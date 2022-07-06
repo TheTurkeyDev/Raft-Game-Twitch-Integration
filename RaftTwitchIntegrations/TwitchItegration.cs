@@ -13,10 +13,11 @@ using HarmonyLib;
 using Debug = UnityEngine.Debug;
 using Newtonsoft.Json.Linq;
 using TMPro;
+using Random = System.Random;
 
 public class TwitchItegration : Mod
 {
-    private static readonly System.Random RAND = new System.Random();
+    private static readonly Random RAND = new Random();
 
     public static int CHANNEL_ID = 2349;
     public static Messages MESSAGE_TYPE_SET_NAME = (Messages)2349;
@@ -313,6 +314,38 @@ public class TwitchItegration : Mod
                             AddNametag(((AI_NetworkBehavior_Shark)array[RAND.Next(array.Length)]).stateMachineShark, userName);
 
                         break;
+                    case "InventoryShuffle":
+                        ShuffleInv(player.Inventory.allSlots.Where(s => s.slotType == SlotType.Normal || s.slotType == SlotType.Hotbar).ToList());
+                        break;
+                    case "ExplodingPufferfish":
+                        AI_NetworkBehaviour_PufferFish pfainb = (AI_NetworkBehaviour_PufferFish)nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.PufferFish, player.transform.position, 1, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                        pfainb.stateMachinePufferFish.state_explode.Explode(player.transform.position);
+                        break;
+                    case "PaintRaft":
+                        SO_ColorValue primary = ColorPicker.Colors[RAND.Next(ColorPicker.Colors.Length)];
+                        SO_ColorValue secondary = ColorPicker.Colors[RAND.Next(ColorPicker.Colors.Length)];
+                        int paintSide = 3;
+                        SO_Pattern[] patterns = Traverse.Create(typeof(ColorMenu)).Field("patterns").GetValue<SO_Pattern[]>();
+                        uint patternIndex = patterns[RAND.Next(patterns.Length)].uniquePatternIndex;
+                        Transform lockedPivot = SingletonGeneric<GameManager>.Singleton.lockedPivot;
+
+                        Dictionary<Block, int> blockToIndex = Traverse.Create(raft.blockCollisionConsolidator).Field("blockToIndex").GetValue<Dictionary<Block, int>>();
+                        foreach (Block b in blockToIndex.Keys)
+                        {
+                            Vector3 vector3_1 = player.Camera.transform.position - b.pivotOffset;
+                            Vector3 vector3_2 = lockedPivot.InverseTransformPoint(b.pivotOffset + vector3_1.normalized * 0.25f);
+                            if (!b.buildableItem.settings_buildable.Paintable || b.HasColor(primary, secondary, paintSide, patternIndex))
+                                return;
+                            Message_PaintBlock messagePaintBlock = new Message_PaintBlock(Messages.PaintBlock, player, b.ObjectIndex, vector3_2, primary, secondary, paintSide, patternIndex);
+                            if (Raft_Network.IsHost)
+                            {
+                                player.Network.RPC(messagePaintBlock, Target.Other, EP2PSend.k_EP2PSendReliable, NetworkChannel.Channel_Game);
+                                b.SetInstanceColorAndPattern(primary, secondary, paintSide, patternIndex);
+                            }
+                            else
+                                player.SendP2P(messagePaintBlock, EP2PSend.k_EP2PSendReliable, NetworkChannel.Channel_Game);
+                        }
+                        break;
                 }
             }
         }
@@ -372,6 +405,23 @@ public class TwitchItegration : Mod
             if ((currentTime - push.startTime).TotalMilliseconds > push.duration)
                 pushData.Remove(push);
         }
+    }
+
+    public void ShuffleInv<T>(List<T> slots) where T : Slot
+    {
+        List<ItemInstance> items = new List<ItemInstance>();
+        foreach (T s in slots)
+            items.Add(s.itemInstance?.Clone());
+        items.Shuffle();
+        for (int i = 0; i < slots.Count(); i++)
+        {
+            if (items[i] != null)
+                slots[i].SetItem(items[i]);
+            else
+                slots[i].SetItem(null, 0);
+        }
+
+
     }
 
     public async void logItems()
@@ -566,7 +616,6 @@ public class TwitchItegration : Mod
         }
     }
 
-
     public class RewardData
     {
         public string action;
@@ -636,6 +685,24 @@ public class TwitchItegration : Mod
         {
             this.push = push;
             this.duration = duration;
+        }
+    }
+}
+
+static class MyExtensions
+{
+    private static Random rng = new Random();
+
+    public static void Shuffle<T>(this IList<T> list)
+    {
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = rng.Next(n + 1);
+            T value = list[k];
+            list[k] = list[n];
+            list[n] = value;
         }
     }
 }
