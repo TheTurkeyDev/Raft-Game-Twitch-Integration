@@ -19,6 +19,8 @@ public class TwitchItegration : Mod
 {
     private static readonly Random RAND = new Random();
 
+    private static SO_ColorValue[] Colors;
+
     public static int CHANNEL_ID = 2349;
     public static Messages MESSAGE_TYPE_SET_NAME = (Messages)2349;
 
@@ -49,6 +51,8 @@ public class TwitchItegration : Mod
 
         harmonyInstance = new Harmony("dev.theturkey.twitchintegration");
         harmonyInstance.PatchAll();
+
+        Colors = Resources.LoadAll<SO_ColorValue>("Colors");
 
 
         channels = new ChannelGroup();
@@ -318,17 +322,16 @@ public class TwitchItegration : Mod
                         ShuffleInv(player.Inventory.allSlots.Where(s => s.slotType == SlotType.Normal || s.slotType == SlotType.Hotbar).ToList());
                         break;
                     case "ExplodingPufferfish":
-                        AI_NetworkBehaviour_PufferFish pfainb = (AI_NetworkBehaviour_PufferFish)nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.PufferFish, player.transform.position, 1, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
+                        AI_NetworkBehaviour_PufferFish pfainb = (AI_NetworkBehaviour_PufferFish)nhe.CreateAINetworkBehaviour(AI_NetworkBehaviourType.PufferFish, player.transform.position + new Vector3(0, 5, 0), 1, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
                         pfainb.stateMachinePufferFish.state_explode.Explode(player.transform.position);
                         break;
                     case "PaintRaft":
-                        SO_ColorValue primary = ColorPicker.Colors[RAND.Next(ColorPicker.Colors.Length)];
-                        SO_ColorValue secondary = ColorPicker.Colors[RAND.Next(ColorPicker.Colors.Length)];
+                        SO_ColorValue primary = Colors[RAND.Next(Colors.Length)];
+                        SO_ColorValue secondary = Colors[RAND.Next(Colors.Length)];
                         int paintSide = 3;
                         SO_Pattern[] patterns = Traverse.Create(typeof(ColorMenu)).Field("patterns").GetValue<SO_Pattern[]>();
                         uint patternIndex = patterns[RAND.Next(patterns.Length)].uniquePatternIndex;
                         Transform lockedPivot = SingletonGeneric<GameManager>.Singleton.lockedPivot;
-
                         Dictionary<Block, int> blockToIndex = Traverse.Create(raft.blockCollisionConsolidator).Field("blockToIndex").GetValue<Dictionary<Block, int>>();
                         foreach (Block b in blockToIndex.Keys)
                         {
@@ -611,7 +614,10 @@ public class TwitchItegration : Mod
             Network_Entity[] array2 = array;
             foreach (Network_Entity network_Entity in array2)
             {
-                ComponentManager<Network_Host>.Value.DamageEntity(network_Entity, network_Entity.transform, 9999f, network_Entity.transform.position, Vector3.up, EntityType.Player);
+                if (network_Entity.entityType == EntityType.Enemy)
+                {
+                    ComponentManager<Network_Host>.Value.DamageEntity(network_Entity, network_Entity.transform, 9999f, network_Entity.transform.position, Vector3.up, EntityType.Player);
+                }
             }
         }
     }

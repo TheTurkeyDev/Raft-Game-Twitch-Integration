@@ -6,7 +6,7 @@
   "license": "GNU AGPLv3",
   "icon": "http://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_logo.jpg",
   "banner": "https://files.theprogrammingturkey.com/images/raft_twitch_integration_mod_banner.jpg",
-  "gameVersion": "1.0",
+  "gameVersion": "1.07",
   "requiredByAllPlayers": true,
   "updateUrl": "https://www.raftmodding.com/api/v1/mods/RaftTwitchIntegration/version.txt",
   "isModPermanent": true,
