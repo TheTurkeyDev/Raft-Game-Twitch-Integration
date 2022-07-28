@@ -162,7 +162,7 @@
       "params": {
         "entity": {
           "type": "string",
-          "display": "entity",
+          "display": "Entity Id",
           "description": "The Id of the entity to spawn",
           "required": true
         },
@@ -201,6 +201,12 @@
           "min": 0,
           "step": 100,
           "measurement": "ms"
+        },
+        "name": {
+          "type": "string",
+          "display": "Name",
+          "description": "The name to give to the animal. Only works if it is a domestic animal. Use ${username} to use the username of the redeemer",
+          "required": false
         }
       },
       "display": "Spawn Entity",
@@ -449,7 +455,47 @@
         }
       },
       "display": "Paint Raft",
-      "description": "All the colors!"
+      "description": "You're an interior decorator Harry!"
+    },
+    "TrashAmount": {
+      "params": {
+        "min": {
+          "type": "number",
+          "display": "Min",
+          "description": "Min spawn rate interval",
+          "default": 0,
+          "min": 0,
+          "step": 1
+        },
+        "max": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Max spawn rate interval",
+          "default": 0,
+          "min": 0,
+          "step": 1
+        },
+        "duration": {
+          "type": "number",
+          "display": "Duration",
+          "description": "How long this should last for",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        },
+        "delay": {
+          "type": "number",
+          "display": "Delay",
+          "description": "Delay length before this action triggers",
+          "default": 0,
+          "min": 0,
+          "step": 100,
+          "measurement": "ms"
+        }
+      },
+      "display": "Trash Spawn Adjustment",
+      "description": "Adjust the trash spawning"
     }
   },
   "type": "config",

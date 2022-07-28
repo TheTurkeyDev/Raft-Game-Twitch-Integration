@@ -34,10 +34,14 @@ public class TwitchItegration : Mod
     public static List<TempEntity> tempEntities = new List<TempEntity>();
     public static List<Meteor> meteors = new List<Meteor>();
     public static List<PushData> pushData = new List<PushData>();
+    public static long trashResetTime = -1;
 
     private StoneDrop stoneDropPrefab = null;
     private Harmony harmonyInstance;
     private static AssetBundle assets;
+
+    private float spawnRateIntervalMin;
+    private float spawnRateIntervalMax;
 
 
     // The Start() method is being called when your mod gets loaded.
@@ -71,6 +75,10 @@ public class TwitchItegration : Mod
         }
         chat = ComponentManager<ChatManager>.Value;
         IntegationSocket.Start("raft", 23491);
+        ObjectSpawnerManager spawnerManager = ComponentManager<ObjectSpawnerManager>.Value;
+        var settings = Traverse.Create(spawnerManager.itemSpawner).Field("currentSettings").GetValue<ObjectSpawnerAssetSettings>();
+        spawnRateIntervalMin = settings.spawnRateInterval.minValue;
+        spawnRateIntervalMax = settings.spawnRateInterval.maxValue;
     }
 
     public override void WorldEvent_WorldLoaded()
@@ -201,11 +209,8 @@ public class TwitchItegration : Mod
                                     case AI_NetworkBehaviourType.Dolphin:
                                     case AI_NetworkBehaviourType.Turtle:
                                     case AI_NetworkBehaviourType.Stingray:
-                                        if (!nhe.GetSpawnPositionDontCollideWithChunkPoint(ref spawnPosition, 50f))
-                                            return;
-                                        break;
                                     case AI_NetworkBehaviourType.Whale:
-                                        if (!nhe.GetSpawnPositionDontCollideWithChunkPoint(ref spawnPosition, 300f))
+                                        if (!nhe.GetSpawnPositionDontCollideWithChunkPoint(ref spawnPosition, 50f))
                                             return;
                                         break;
                                     case AI_NetworkBehaviourType.BirdPack:
@@ -216,7 +221,11 @@ public class TwitchItegration : Mod
 
                                 AI_NetworkBehaviour ainb = nhe.CreateAINetworkBehaviour(value, spawnPosition, scale, SaveAndLoad.GetUniqueObjectIndex(), SaveAndLoad.GetUniqueObjectIndex(), null);
                                 if (ainb is AI_NetworkBehaviour_Domestic)
+                                {
                                     (ainb as AI_NetworkBehaviour_Domestic).QuickTameLate();
+                                    (ainb as AI_NetworkBehaviour_Domestic).SetNameTagEnabled(true);
+                                    (ainb as AI_NetworkBehaviour_Domestic).nameTag.SetText(((string)(values["name"] ?? "")).Replace("${username}", userName));
+                                }
 
                                 int health = (int)(values["health"] ?? -1);
                                 if (health != -1)
@@ -239,7 +248,6 @@ public class TwitchItegration : Mod
                         }
                         break;
                     case "ChangeWeather":
-                        Debug.Log("Weather!");
                         string weatherName = (string)values["weather"];
                         bool instant = (bool)values["instant"];
                         WeatherManager wm = ComponentManager<WeatherManager>.Value;
@@ -327,7 +335,7 @@ public class TwitchItegration : Mod
                         break;
                     case "PaintRaft":
                         SO_ColorValue primary = Colors[RAND.Next(Colors.Length)];
-                        SO_ColorValue secondary = Colors[RAND.Next(Colors.Length)];
+                        SO_ColorValue secondary = RAND.NextDouble() > 0.5 ? Colors[RAND.Next(Colors.Length)] : primary;
                         int paintSide = 3;
                         SO_Pattern[] patterns = Traverse.Create(typeof(ColorMenu)).Field("patterns").GetValue<SO_Pattern[]>();
                         uint patternIndex = patterns[RAND.Next(patterns.Length)].uniquePatternIndex;
@@ -348,6 +356,13 @@ public class TwitchItegration : Mod
                             else
                                 player.SendP2P(messagePaintBlock, EP2PSend.k_EP2PSendReliable, NetworkChannel.Channel_Game);
                         }
+                        break;
+                    case "TrashAmount":
+                        ObjectSpawnerManager spawnerManager = ComponentManager<ObjectSpawnerManager>.Value;
+                        var settings = Traverse.Create(spawnerManager.itemSpawner).Field("currentSettings").GetValue<ObjectSpawnerAssetSettings>();
+                        settings.spawnRateInterval.minValue = (int)values["min"];
+                        settings.spawnRateInterval.maxValue = (int)values["max"];
+                        trashResetTime = (trashResetTime == -1 ? new DateTime().Millisecond : trashResetTime) + (int)values["duration"];
                         break;
                 }
             }
@@ -407,6 +422,15 @@ public class TwitchItegration : Mod
             player.PersonController.transform.position += push.push * Time.deltaTime;
             if ((currentTime - push.startTime).TotalMilliseconds > push.duration)
                 pushData.Remove(push);
+        }
+
+        if (trashResetTime != -1 && currentTime.Millisecond < trashResetTime)
+        {
+            trashResetTime = -1;
+            ObjectSpawnerManager spawnerManager = ComponentManager<ObjectSpawnerManager>.Value;
+            var settings = Traverse.Create(spawnerManager.itemSpawner).Field("currentSettings").GetValue<ObjectSpawnerAssetSettings>();
+            settings.spawnRateInterval.minValue = spawnRateIntervalMin;
+            settings.spawnRateInterval.maxValue = spawnRateIntervalMax;
         }
     }
 
